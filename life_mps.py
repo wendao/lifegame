@@ -478,7 +478,7 @@ def visualize(sim: LifeMPS, gens: int, interval: int) -> None:
     from matplotlib.patches import Rectangle
 
     fig, ax = plt.subplots(figsize=(7, 7))
-    ax.set_title(f"Game of Life — device: {sim.device.type.upper()}")
+    ax.set_title(f"Game of Life - device: {sim.device.type.upper()}")
     ax.set_xticks([])
     ax.set_yticks([])
     img = ax.imshow(sim.to_numpy(), cmap="binary", interpolation="nearest")
@@ -498,8 +498,8 @@ def visualize(sim: LifeMPS, gens: int, interval: int) -> None:
     dev = sim.device.type.upper()
 
     def title():
-        tag = "  [已暂停 - 按空格继续]" if state["paused"] else ""
-        ax.set_title(f"Game of Life — {dev} — gen {state['gen']}{tag}")
+        tag = "  [PAUSED - press SPACE]" if state["paused"] else ""
+        ax.set_title(f"Game of Life - {dev} - gen {state['gen']}{tag}")
 
     def update(_frame):
         if state["paused"]:          # 暂停时不推进, 只保持画面
