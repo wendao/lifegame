@@ -51,6 +51,8 @@ python life_mps.py --gens -1
 
 可视化窗口中按 **空格键** 暂停/继续动画（暂停时计时器真正停止，不消耗代数）。
 
+窗口右侧实时绘制**活细胞数随时间的变化**：时间窗口最多 600 代，前 600 代随时间自动伸缩，之后改为平移（始终显示最近 600 代）。
+
 ## 可用图案
 
 按类型分组（`python life_mps.py --list-patterns` 可随时查看）：
@@ -80,6 +82,9 @@ python life_mps.py --place snark@30,30 --gens -1
 
 # 周期 30 的 Queen Bee Shuttle
 python life_mps.py --pattern queenbee
+
+# Snark Loop
+python life_mps.py --size 60 --place snark@4,16:0 --place snark@16,32:90 --place snark@32,26:180 --place snark@26,4:270 --gens -1
 ```
 
 ## 朝向（四种方向）
@@ -117,6 +122,30 @@ python life_mps.py --pattern ./patterns/spacefiller.rle
 # 与库内图案混合放置
 python life_mps.py --place snark@20,20 --place ./my_gun.cells@60,60 --gens -1
 ```
+
+## 随附的图案文件
+
+仓库里已带几个现成的 `.rle`，可直接用 `--pattern` 加载：
+
+| 文件 | 说明 | 增长 |
+|------|------|------|
+| `snark_loop.rle` | 四个 Snark 围成的滑翔机环（LifeWiki 最小构造） | 振荡器，周期 43 |
+| `spacefiller.rle` | Spacefiller（Hartmut Holzwart 1998），以 c/2 向四个方向铺满平面 | **二次增长 O(t²)** |
+| `breeder.rle` | Riley's breeder（2006），38 细胞繁殖机，每 140 代产生一个开关引擎 | **二次增长 O(t²)** |
+
+```bash
+# 滑翔机环
+python life_mps.py --pattern snark_loop.rle --size 120 --gens -1
+
+# Spacefiller（长得很快，给大网格）
+python life_mps.py --pattern spacefiller.rle --size 600 --gens -1
+
+# Riley's breeder
+python life_mps.py --pattern breeder.rle --size 800 --gens -1
+```
+
+> 提示：增长型图案在默认周期边界下长到撞上边缘会绕回自撞，想看更久就把 `--size` 开更大；
+> 右侧人口曲线会清楚显示二次爬升。
 
 ## 性能基准
 

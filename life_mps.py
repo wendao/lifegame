@@ -477,11 +477,16 @@ def visualize(sim: LifeMPS, gens: int, interval: int) -> None:
 
     from matplotlib.patches import Rectangle
 
-    fig, ax = plt.subplots(figsize=(7, 7))
+    WINDOW = 600  # 人口曲线的最大时间窗口
+
+    fig, (ax, ax2) = plt.subplots(
+        1, 2, figsize=(12, 6), gridspec_kw={"width_ratios": [1, 1]}
+    )
     ax.set_title(f"Game of Life - device: {sim.device.type.upper()}")
     ax.set_xticks([])
     ax.set_yticks([])
-    img = ax.imshow(sim.to_numpy(), cmap="binary", interpolation="nearest")
+    arr0 = sim.to_numpy()
+    img = ax.imshow(arr0, cmap="binary", interpolation="nearest")
 
     # 给盒子加一个边框 (环形边界的可视化边缘)
     H, W = sim.board.shape
@@ -494,6 +499,14 @@ def visualize(sim: LifeMPS, gens: int, interval: int) -> None:
     ax.set_xlim(-1.5, W + 0.5)
     ax.set_ylim(H + 0.5, -1.5)
 
+    # 右侧: 活细胞数随时间变化
+    xs, ys = [0], [int(arr0.sum())]
+    (popline,) = ax2.plot(xs, ys, color="#d62728", lw=1.5)
+    ax2.set_xlabel("generation")
+    ax2.set_ylabel("alive cells")
+    ax2.set_title("Population")
+    ax2.grid(True, alpha=0.3)
+
     state = {"gen": 0, "paused": False}
     dev = sim.device.type.upper()
 
@@ -503,12 +516,26 @@ def visualize(sim: LifeMPS, gens: int, interval: int) -> None:
 
     def update(_frame):
         if state["paused"]:          # 暂停时不推进, 只保持画面
-            return (img,)
+            return (img, popline)
         sim.step()
         state["gen"] += 1
-        img.set_data(sim.to_numpy())
+        arr = sim.to_numpy()
+        img.set_data(arr)
+        # 更新人口曲线 (滑动窗口最多 1000)
+        g = state["gen"]
+        xs.append(g)
+        ys.append(int(arr.sum()))
+        if len(xs) > WINDOW:
+            del xs[0]
+            del ys[0]
+        popline.set_data(xs, ys)
+        # x 轴: 1000 代前随时间伸缩, 之后平移
+        left = max(0, g - WINDOW)
+        ax2.set_xlim(left, max(g, left + 10))
+        ymax = max(ys)
+        ax2.set_ylim(0, ymax * 1.1 + 1)
         title()
-        return (img,)
+        return (img, popline)
 
     # gens < 0 -> frames=None: 无限循环更新, 关闭窗口即停止
     frames = None if gens < 0 else gens
